@@ -9,6 +9,8 @@
         "fideloper/proxy": "^4.4",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
+        "itstructure/laravel-grid-view": "~1.0.7",
+        "laravel-views/laravel-views": "^2.2",
         "laravel/framework": "^8.40",
         "laravel/tinker": "^2.5",
         "laravel/ui": "^3.2"

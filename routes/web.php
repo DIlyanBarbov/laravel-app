@@ -1,6 +1,5 @@
 <?php
-
-use App\Controllers\UserController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,8 +17,7 @@ Route::get('/', static function () {
     return view('welcome');
 });
 
-Route::get('/login', [UserController::class, 'login']);
-
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/edit', [App\Http\Controllers\UserController::class, 'edit'])->name('edit');
