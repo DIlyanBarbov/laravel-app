@@ -255,11 +255,11 @@
             color: rgba(74, 85, 104, var(--text-opacity))
         }
 
-        .text-gray-900 {
-            --text-opacity: 1;
-            color: #1a202c;
-            color: rgba(26, 32, 44, var(--text-opacity))
-        }
+        /*.text-gray-900 {*/
+        /*    --text-opacity: 1;*/
+        /*    color: #1a202c;*/
+        /*    color: rgba(26, 32, 44, var(--text-opacity))*/
+        /*}*/
 
         .underline {
             text-decoration: underline
@@ -361,11 +361,11 @@
                 background-color: rgba(45, 55, 72, var(--bg-opacity))
             }
 
-            .dark\:bg-gray-900 {
-                --bg-opacity: 1;
-                background-color: #1a202c;
-                background-color: rgba(26, 32, 44, var(--bg-opacity))
-            }
+            /*.dark\:bg-gray-900 {*/
+            /*    --bg-opacity: 1;*/
+            /*    background-color: #1a202c;*/
+            /*    background-color: rgba(26, 32, 44, var(--bg-opacity))*/
+            /*}*/
 
             .dark\:border-gray-700 {
                 --border-opacity: 1;
