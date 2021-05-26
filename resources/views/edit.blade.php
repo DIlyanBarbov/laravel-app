@@ -9,4 +9,10 @@
             </button>
         </form>
     </div>
+
+    <div class="container mt-4">
+        @foreach ($pictures as $picture)
+            <div class="col-xs-4"><img src="{{ $picture }}"></div>
+        @endforeach
+    </div>
 @endsection

@@ -54,7 +54,7 @@ return [
         'gcs' => [
             'driver'          => 'gcs',
             'project_id'      => env('GOOGLE_CLOUD_PROJECT_ID', 'atomic-arbor-314312'),
-            'key_file'        => env('GOOGLE_APPLICATION_CREDENTIALS', './config/googlecloud.json'), // optional: /path/to/service-account.json
+            'key_file'        => env('GOOGLE_APPLICATION_CREDENTIALS', config_path('googlecloud.json')), // optional: /path/to/service-account.json
             'bucket'          => env('GOOGLE_CLOUD_STORAGE_BUCKET', 'atomic-arbor-314312.appspot.com'),
             'path_prefix'     => env('GOOGLE_CLOUD_STORAGE_PATH_PREFIX', null), // optional: /default/path/to/apply/in/bucket
             'storage_api_uri' => env('GOOGLE_CLOUD_STORAGE_API_URI', 'https://storage.googleapis.com/atomic-arbor-314312.appspot.com/'), // see: Public URLs below

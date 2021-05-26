@@ -1,23 +1,19 @@
 <?php
 
-
 namespace App\Http\Controllers;
 
-
-use App\Http\Kernel;
 use App\Models\File;
-use App\Models\User;
 use Google\Cloud\Storage\StorageClient;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
     public function edit()
     {
-        return view('edit');
+        return view('edit', ['pictures' => $this->pictures()]);
     }
 
     private function getBucket()
@@ -48,7 +44,7 @@ class UserController extends Controller
 
             $fileSource = fopen($publicPath, 'rb');
             $so         = $bucket->upload($fileSource, [
-                'predefinedAcl' => 'publicRead',
+//                'predefinedAcl' => 'publicRead',
                 'name'          => $gcsPath,
             ]);
 
@@ -56,16 +52,16 @@ class UserController extends Controller
             if ($so) {
                 $file->fill([
                     'file_name' => $fileName,
-                    'path'      => $gcsPath,
-                    'mime_type' => $mimeType,
+                    'path'      => 'uploads/',
+                    'mime_type' => $mime,
                     'user_id'   => $user_id,
                 ]);
                 $file->save();
-                return view('edit', ['success' => true]);
+                return view('edit', ['pictures' => $this->pictures()]);
             }
 
         }
-        return view('edit', ['success' => false]);
+        return view('edit', ['pictures' => $this->pictures()]);
     }
 
     public function pictures()
@@ -74,6 +70,17 @@ class UserController extends Controller
         $user_id = Auth::user()->getAuthIdentifier();
 
         $files = File::all()->where('user_id', '=', $user_id);
-        return \response()->json([$files]);
+        $urls  = [];
+        foreach ($files as $file) {
+            $farr = $file->toArray();
+//            $img  = $bucket->object('uploads/' . $file['file_name'] . $file['mime_type']);
+            $gcs = Storage::disk('gcs');
+            Log::info($gcs->url('uploads/' . $file['file_name'] . $file['mime_type']));
+            $url    = $gcs->url('uploads/' . $file['file_name'] . $file['mime_type']);
+            $urls[] = $url;
+        }
+
+
+        return $urls;
     }
 }
