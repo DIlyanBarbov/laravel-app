@@ -70,9 +70,10 @@ class UserController extends Controller
 
     public function pictures()
     {
-        $bucket = $this->getBucket();
+        $bucket  = $this->getBucket();
         $user_id = Auth::user()->getAuthIdentifier();
-        $files = File::query()->where(['user_id' => $user_id]);
+
+        $files = File::all()->where('user_id', '=', $user_id);
         return \response()->json([$files]);
     }
 }
