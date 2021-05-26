@@ -10,4 +10,11 @@ class File extends Model
     use HasFactory;
 
     protected $table = 'files';
+
+    protected $fillable = [
+        'file_name',
+        'path',
+        'mime_type',
+        'user_id'
+    ];
 }
