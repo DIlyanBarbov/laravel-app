@@ -100,7 +100,7 @@ class UserController extends Controller
 
             $fileSource = fopen($publicPath, 'rb');
             $so         = $bucket->upload($fileSource, [
-//                'predefinedAcl' => 'publicRead',
+                'predefinedAcl' => 'publicRead',
                 'name' => $gcsPath,
             ]);
 
@@ -122,7 +122,6 @@ class UserController extends Controller
 
     public function pictures()
     {
-
         $user_id = Auth::user()->getAuthIdentifier();
 
         $files = File::all()->where('user_id', '=', $user_id);
@@ -139,7 +138,6 @@ class UserController extends Controller
                 'url' => $url,
             ];
         }
-
 
         return $urls;
     }
