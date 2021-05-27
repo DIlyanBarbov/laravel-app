@@ -7,6 +7,8 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+You need to create a local db to run the app, config is in .env file
+
 To install: <br>
 composer install <br>
 npm install & npm run dev <br>
