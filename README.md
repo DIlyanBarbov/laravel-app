@@ -7,13 +7,13 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
-To install:
-composer install
-npm install & npm run dev
-php artisan migrate
-php artisan optimize:clear
-php artisan config:cache
-php artisan serve
+To install: <br>
+composer install <br>
+npm install & npm run dev <br>
+php artisan migrate <br>
+php artisan optimize:clear <br>
+php artisan config:cache <br>
+php artisan serve <br>
 
 ## License
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
