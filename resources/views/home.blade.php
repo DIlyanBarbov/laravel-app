@@ -3,7 +3,8 @@
 @section('content')
     <div class="container">
         @php
-            $gridData = [
+            use App\Http\Controllers\UserController;
+        $gridData = [
         'dataProvider' => $dataProvider,
         'useFilters' => false,
         'columnFields' => [
@@ -13,8 +14,12 @@
                 'class' => Itstructure\GridView\Columns\ActionColumn::class, // Required
                 'actionTypes' => [
                     'edit' => static function ($data){
-                    return action([\App\Http\Controllers\UserController::class, 'edit'], ['id' => $data['id']]);
+                        return action([UserController::class, 'edit'], ['id' => $data['id']]);
+                    },
+                    'view' => static function ($data){
+                        return action([UserController::class, 'viewPictures']);
                     }
+
                 ]
             ]
         ],

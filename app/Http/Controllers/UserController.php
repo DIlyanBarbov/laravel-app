@@ -3,21 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Models\File;
+use App\Models\User;
 use Google\Cloud\Storage\StorageClient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
+    public function viewPictures(Request $request)
+    {
+        return view('viewPictures', ['pictures' => $this->pictures()]);
+    }
+
     public function edit(Request $request)
     {
         if ($request->method() === 'GET') {
-            return view('edit', ['pictures' => $this->pictures()]);
+            return view('edit');
         }
-
+        $user = User::query()->find(Auth::user()->getAuthIdentifier());
         if ($request->method() === 'POST' && $newUsername = $request->post('name')) {
             $validator = Validator::make($request->all(), [
                 'name' => 'unique:users|max:255',
@@ -26,7 +33,10 @@ class UserController extends Controller
             if ($validator->fails()) {
                 return redirect('/edit')->withErrors($validator)->withInput();
             }
-            Log::info('name');
+            $user->update(['name' => $newUsername]);
+            $user->save();
+            Session::flash('success', 'Successfully edited username.');
+            return view('edit');
         }
         if ($request->method() === 'POST' && $newEmail = $request->post('email')) {
             $validator = Validator::make($request->all(), [
@@ -35,7 +45,11 @@ class UserController extends Controller
             if ($validator->fails()) {
                 return redirect('/edit')->withErrors($validator)->withInput();
             }
-            Log::info('email');
+            $user = User::query()->find($id);
+            $user->update(['email' => $newEmail]);
+            $user->save();
+            Session::flash('success', 'Successfully edited email.');
+            return view('edit');
         }
 
     }
@@ -81,11 +95,11 @@ class UserController extends Controller
                     'user_id'   => $user_id,
                 ]);
                 $file->save();
+                Session::flash('success', 'File Uploaded Successfully.');
                 return view('edit', ['pictures' => $this->pictures()]);
             }
-
         }
-        return view('edit', ['pictures' => $this->pictures()]);
+        return view('edit');
     }
 
     public function pictures()

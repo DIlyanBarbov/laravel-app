@@ -23,5 +23,7 @@ Auth::routes();
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/edit', [App\Http\Controllers\UserController::class, 'edit'])->name('edit');
 Route::post('/upload', [App\Http\Controllers\UserController::class, 'upload'])->name('upload');
+Route::get('/upload', [App\Http\Controllers\UserController::class, 'upload'])->name('upload');
 Route::get('/pictures', [App\Http\Controllers\UserController::class, 'pictures'])->name('pictures');
 Route::post('/edit', [App\Http\Controllers\UserController::class, 'edit'])->name('edit');
+Route::get('/viewPictures', [\App\Http\Controllers\UserController::class, 'viewPictures'])->name('viewPictures');
