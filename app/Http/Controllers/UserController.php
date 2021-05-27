@@ -24,6 +24,7 @@ class UserController extends Controller
         if ($request->method() === 'GET') {
             return view('edit');
         }
+
         $user = User::query()->find(Auth::user()->getAuthIdentifier());
         if ($request->method() === 'POST' && $newUsername = $request->post('name')) {
             $validator = Validator::make($request->all(), [
@@ -33,6 +34,7 @@ class UserController extends Controller
             if ($validator->fails()) {
                 return redirect('/edit')->withErrors($validator)->withInput();
             }
+
             $user->update(['name' => $newUsername]);
             $user->save();
             Session::flash('success', 'Successfully edited username.');
@@ -42,10 +44,11 @@ class UserController extends Controller
             $validator = Validator::make($request->all(), [
                 'email' => 'email',
             ]);
+
             if ($validator->fails()) {
                 return redirect('/edit')->withErrors($validator)->withInput();
             }
-            $user = User::query()->find($id);
+
             $user->update(['email' => $newEmail]);
             $user->save();
             Session::flash('success', 'Successfully edited email.');
