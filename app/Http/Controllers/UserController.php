@@ -8,12 +8,36 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
-    public function edit()
+    public function edit(Request $request)
     {
-        return view('edit', ['pictures' => $this->pictures()]);
+        if ($request->method() === 'GET') {
+            return view('edit', ['pictures' => $this->pictures()]);
+        }
+
+        if ($request->method() === 'POST' && $newUsername = $request->post('name')) {
+            $validator = Validator::make($request->all(), [
+                'name' => 'unique:users|max:255',
+            ]);
+
+            if ($validator->fails()) {
+                return redirect('/edit')->withErrors($validator)->withInput();
+            }
+            Log::info('name');
+        }
+        if ($request->method() === 'POST' && $newEmail = $request->post('email')) {
+            $validator = Validator::make($request->all(), [
+                'email' => 'email',
+            ]);
+            if ($validator->fails()) {
+                return redirect('/edit')->withErrors($validator)->withInput();
+            }
+            Log::info('email');
+        }
+
     }
 
     private function getBucket()
@@ -45,7 +69,7 @@ class UserController extends Controller
             $fileSource = fopen($publicPath, 'rb');
             $so         = $bucket->upload($fileSource, [
 //                'predefinedAcl' => 'publicRead',
-                'name'          => $gcsPath,
+                'name' => $gcsPath,
             ]);
 
             $user_id = Auth::user()->getAuthIdentifier();
@@ -66,18 +90,21 @@ class UserController extends Controller
 
     public function pictures()
     {
-        $bucket  = $this->getBucket();
+
         $user_id = Auth::user()->getAuthIdentifier();
 
         $files = File::all()->where('user_id', '=', $user_id);
         $urls  = [];
         foreach ($files as $file) {
-            $farr = $file->toArray();
+//            $bucket  = $this->getBucket();
 //            $img  = $bucket->object('uploads/' . $file['file_name'] . $file['mime_type']);
-            $gcs = Storage::disk('gcs');
-            Log::info($gcs->url('uploads/' . $file['file_name'] . $file['mime_type']));
+//            $url = $img->signedUrl(new \DateTime('15 minutes'), [
+//                'version' => 'v4',
+//            ]);
+            $gcs    = Storage::disk('gcs');
             $url    = $gcs->url('uploads/' . $file['file_name'] . $file['mime_type']);
-            $urls[] = $url;
+            $newUrl = substr_replace($url, '%20', 71, 0);
+            $urls[] = $newUrl;
         }
 
 
