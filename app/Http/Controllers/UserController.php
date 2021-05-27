@@ -14,6 +14,21 @@ use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
+    public function deletePicture(Request $request)
+    {
+        $file = File::query()->where('id', '=', $request['id'])->first();
+        if ($file->delete()) {
+            $bucket  = $this->getBucket();
+            $gcsPath = 'uploads/' . $file['file_name'] . $file['mime_type'];
+            $img     = $bucket->object($gcsPath);
+            $img->delete();
+            Session::flash('success', 'Successfully deleted');
+            return redirect()->route('viewPictures');
+        }
+        Session::flash('errors', 'Failed to delete');
+        return redirect()->route('viewPictures');
+    }
+
     public function viewPictures(Request $request)
     {
         return view('viewPictures', ['pictures' => $this->pictures()]);
@@ -79,7 +94,7 @@ class UserController extends Controller
             $fileName   = $request->file('file')->getFilename();
             $mimeType   = $request->file('file')->getMimeType();
             $mime       = str_contains($mimeType, 'png') ? '.png' : '.jpg';
-            $gcsPath    = 'uploads/ ' . $fileName . $mime;
+            $gcsPath    = 'uploads/' . $fileName . $mime;
             $filepath   = $request->file('file')->storeAs('uploads', $fileName . $mime, 'public');
             $publicPath = storage_path('app/public/uploads/' . $fileName . $mime);
 
@@ -113,15 +128,16 @@ class UserController extends Controller
         $files = File::all()->where('user_id', '=', $user_id);
         $urls  = [];
         foreach ($files as $file) {
-//            $bucket  = $this->getBucket();
-//            $img  = $bucket->object('uploads/' . $file['file_name'] . $file['mime_type']);
-//            $url = $img->signedUrl(new \DateTime('15 minutes'), [
-//                'version' => 'v4',
-//            ]);
-            $gcs    = Storage::disk('gcs');
-            $url    = $gcs->url('uploads/' . $file['file_name'] . $file['mime_type']);
-            $newUrl = substr_replace($url, '%20', 71, 0);
-            $urls[] = $newUrl;
+            $bucket = $this->getBucket();
+            $gcsPath = 'uploads/' . $file['file_name'] . $file['mime_type'];
+            $img    = $bucket->object($gcsPath);
+            $url    = $img->signedUrl(new \DateTime('15 minutes'), [
+                'version' => 'v4',
+            ]);
+            $urls[] = [
+                'id'  => $file['id'],
+                'url' => $url,
+            ];
         }
 
 

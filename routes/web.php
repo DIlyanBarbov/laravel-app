@@ -26,4 +26,5 @@ Route::post('/upload', [App\Http\Controllers\UserController::class, 'upload'])->
 Route::get('/upload', [App\Http\Controllers\UserController::class, 'upload'])->name('upload');
 Route::get('/pictures', [App\Http\Controllers\UserController::class, 'pictures'])->name('pictures');
 Route::post('/edit', [App\Http\Controllers\UserController::class, 'edit'])->name('edit');
-Route::get('/viewPictures', [\App\Http\Controllers\UserController::class, 'viewPictures'])->name('viewPictures');
+Route::get('/viewPictures', [App\Http\Controllers\UserController::class, 'viewPictures'])->name('viewPictures');
+Route::post('/deletePicture', [App\Http\Controllers\UserController::class, 'deletePicture'])->name('deletePicture');
