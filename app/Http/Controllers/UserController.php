@@ -2,38 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\File;
+use App\BL\FileBL;
 use App\Models\User;
-use Google\Cloud\Storage\StorageClient;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
-    public function deletePicture(Request $request)
-    {
-        $file = File::query()->where('id', '=', $request['id'])->first();
-        if ($file->delete()) {
-            $bucket  = $this->getBucket();
-            $gcsPath = 'uploads/' . $file['file_name'] . $file['mime_type'];
-            $img     = $bucket->object($gcsPath);
-            $img->delete();
-            Session::flash('success', 'Successfully deleted');
-            return redirect()->route('viewPictures');
-        }
-        Session::flash('errors', 'Failed to delete');
-        return redirect()->route('viewPictures');
-    }
-
-    public function viewPictures(Request $request)
-    {
-        return view('viewPictures', ['pictures' => $this->pictures()]);
-    }
-
+    /**
+     * @param Request $request
+     *
+     * @return Factory|View|RedirectResponse|Redirector
+     */
     public function edit(Request $request)
     {
         if ($request->method() === 'GET') {
@@ -69,47 +55,33 @@ class UserController extends Controller
             Session::flash('success', 'Successfully edited email.');
             return view('edit');
         }
-
     }
 
-    private function getBucket()
-    {
-        $googleConfigFile  = file_get_contents(config_path('googlecloud.json'));
-        $storage           = new StorageClient([
-            'keyFile' => json_decode($googleConfigFile, true),
-        ]);
-        $storageBucketName = config('googlecloud.storage_bucket');
-        return $storage->bucket($storageBucketName);
-    }
-
+    /**
+     * @param Request $request
+     *
+     * @return Factory|View
+     * @throws \Exception
+     */
     public function upload(Request $request)
     {
-        $bucket = $this->getBucket();
         $request->validate([
             'file' => 'required|mimes:jpg,png',
         ]);
 
-        $file = new File();
+        $file = new FileBL();
         if ($request->file()) {
-            $fileName   = $request->file('file')->getFilename();
-            $mimeType   = $request->file('file')->getMimeType();
-            $mime       = str_contains($mimeType, 'png') ? '.png' : '.jpg';
-            $gcsPath    = 'uploads/' . $fileName . $mime;
-            $filepath   = $request->file('file')->storeAs('uploads', $fileName . $mime, 'public');
-            $publicPath = storage_path('app/public/uploads/' . $fileName . $mime);
-
-            $fileSource = fopen($publicPath, 'rb');
-            $so         = $bucket->upload($fileSource, [
-                'predefinedAcl' => 'publicRead',
-                'name' => $gcsPath,
-            ]);
+            $fileToUpload = $request->file('file');
+            $fileName     = $fileToUpload->getFilename();
+            $mimeType     = $fileToUpload->getMimeType();
+            $file->setExt($mimeType);
 
             $user_id = Auth::user()->getAuthIdentifier();
-            if ($so) {
+            if ($file->upload($fileName, $fileToUpload)) {
                 $file->fill([
                     'file_name' => $fileName,
                     'path'      => 'uploads/',
-                    'mime_type' => $mime,
+                    'mime_type' => $file->getExt(),
                     'user_id'   => $user_id,
                 ]);
                 $file->save();
@@ -120,19 +92,29 @@ class UserController extends Controller
         return view('edit');
     }
 
-    public function pictures()
+    /**
+     * @param Request $request
+     *
+     * @return Factory|View
+     * @throws \Exception
+     */
+    public function viewPictures(Request $request)
+    {
+        return view('viewPictures', ['pictures' => $this->pictures()]);
+    }
+
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    private function pictures()
     {
         $user_id = Auth::user()->getAuthIdentifier();
 
-        $files = File::all()->where('user_id', '=', $user_id);
+        $files = FileBL::all()->where('user_id', '=', $user_id);
         $urls  = [];
         foreach ($files as $file) {
-            $bucket = $this->getBucket();
-            $gcsPath = 'uploads/' . $file['file_name'] . $file['mime_type'];
-            $img    = $bucket->object($gcsPath);
-            $url    = $img->signedUrl(new \DateTime('15 minutes'), [
-                'version' => 'v4',
-            ]);
+            $url    = $file->getUrl();
             $urls[] = [
                 'id'  => $file['id'],
                 'url' => $url,
